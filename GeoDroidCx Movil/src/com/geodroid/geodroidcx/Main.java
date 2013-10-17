@@ -99,7 +99,7 @@ public class Main extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				lanzarActivity(Salir.class);
+				
 			}
 		});
     }
