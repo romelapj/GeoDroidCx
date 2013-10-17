@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:key="preferencias_principal">
+    <PreferenceCategory 
+        android:title="Parametros">
+	    <EditTextPreference 
+	        android:key="nombre"
+	        android:title="Nombre del Predio"
+	        android:summary="Indica el nombre del predio a medir."
+	        android:defaultValue="GeoDroidCx"/>
+	    <CheckBoxPreference 
+	        android:key="musica"
+	        android:title="Reproducir música"
+	        android:summary="Se reproduce música de fondo"/>
+	    <ListPreference 
+	        android:key="idioma"
+	        android:title="Idioma"
+	        android:summary="Idioma a trabajar en la aplicación"
+	        android:entries="@array/tipoIdioma"
+	        android:entryValues="@array/tipoIdiomaValores"
+	        android:defaultValue="0"/>
+	    <ListPreference 
+	        android:key="unidMedida"
+	        android:title="Unidad de Medida"
+	        android:summary="Se elige la unidad de medida"
+	        android:entries="@array/tipoUnidMedida"
+	        android:entryValues="@array/tipoUnidMedidaValores"
+	        android:defaultValue="0"/>
+	    <ListPreference 
+	        android:key="precGps"
+	        android:title="Precisión Gps"
+	        android:summary="Precisión en modo GPS"
+	        android:entries="@array/tipoPrecGPS"
+	        android:entryValues="@array/tipoPrecGPSValores"
+	        android:defaultValue="0"/>
+	</PreferenceCategory>
+    <PreferenceCategory 
+        android:title="Conexión">
+        <ListPreference 
+	        android:key="dispositivo"
+	        android:title="Dispositivo"
+	        android:summary="Dispositivo de conexión"
+	        android:entries="@array/tipoDispositivo"
+	        android:entryValues="@array/tipoDispositivoValores"
+	        android:defaultValue="0"/>
+        <EditTextPreference 
+	        android:key="ipCamara"
+	        android:title="Direccion ip de la camara"
+	        android:summary="Indica la direccion ip de la camara."
+	        android:defaultValue="192.168.0.22"/>
+    </PreferenceCategory>
+    
+       
+	    
+
+</PreferenceScreen>

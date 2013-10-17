@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tipoIdioma">
+        <item >Español</item>
+        <item >Ingles</item>
+    </string-array>
+    <string-array name="tipoIdiomaValores">
+        <item >0</item>
+        <item >1</item>
+    </string-array>
+    <string-array name="tipoUnidMedida">
+        <item >metro</item>
+        <item >kilometro</item>
+        <item >yarda</item>
+        <item >pie</item>
+    </string-array>
+    <string-array name="tipoUnidMedidaValores">
+        <item >0</item>
+        <item >1</item>
+        <item >2</item>
+        <item >3</item>
+    </string-array>
+    <string-array name="tipoPrecGPS">
+        <item >5</item>
+        <item >10</item>
+        <item >100</item>
+    </string-array>
+    <string-array name="tipoPrecGPSValores">
+        <item >0</item>
+        <item >1</item>
+        <item >2</item>
+    </string-array>
+     <string-array name="tipoDispositivo">
+        <item >bluetooth</item>
+        <item >wifly</item>
+        <item >xbee</item>
+    </string-array>
+    <string-array name="tipoDispositivoValores">
+        <item >0</item>
+        <item >1</item>
+        <item >2</item>
+    </string-array>
+</resources>

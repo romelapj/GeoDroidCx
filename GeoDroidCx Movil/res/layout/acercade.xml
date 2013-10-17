@@ -1,0 +1,10 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvAcercaDe"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="30dip"
+	    android:text=" Este programa a sido desarrollado por los estudiantes Andrea Liseth Rojas Jimenez  y Romel Alejandro Palomino Jaramillo como requisito final para optar por el título de Ingeniero de Sistemas."
+    android:textSize="20dip">
+    
+</TextView>
+    

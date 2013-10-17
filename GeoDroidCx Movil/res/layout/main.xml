@@ -1,0 +1,68 @@
+<LinearLayout
+xmlns:android ="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:gravity="center"
+	android:padding="30dip"
+	android:background="@drawable/fondo"
+	>
+    
+    <TextView 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="100sp"
+        android:layout_marginBottom="200dip"
+        android:text="@string/tituloAplicacion"
+        android:layout_marginTop="120dip"
+        android:textColor="@android:color/white"/>
+    <TableLayout 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:stretchColumns="*">
+        <TableRow>
+            <Button android:id="@+id/btnComenzar"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:text="@string/comenzar"
+                android:textSize="40px"
+                android:background="@drawable/boton2"
+                android:layout_margin="10dp"
+                android:textColor="@android:color/white"/>
+                
+            <Button android:id="@+id/btnConfiguracion"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:text="@string/configurar"
+                android:textSize="40px"
+                android:background="@drawable/boton2"
+                android:layout_margin="10dp"
+                android:textColor="@android:color/white"/>
+        </TableRow>
+        <TableRow>
+
+            <Button
+                android:id="@+id/btnAcercaDe"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/boton2"
+                android:onClick="lanzarAcercaDe"
+                android:text="@string/acerca"
+                android:textColor="@android:color/white"
+                android:textSize="40px" />
+
+            <Button android:id="@+id/btnSalir"
+                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:textSize="40px"
+                android:text="@string/exit"
+                android:background="@drawable/boton2"
+                android:layout_margin="10dp"
+                android:textColor="@android:color/white"/>
+        </TableRow>
+    </TableLayout>
+</LinearLayout>
+    
