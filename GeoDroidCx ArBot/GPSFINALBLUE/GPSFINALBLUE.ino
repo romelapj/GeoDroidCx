@@ -23,7 +23,10 @@ int bulb1 = 13;
 boolean envioGPS=false;
 
 
-
+String trama[5];
+String  text = "Peter,Paul,Mary";  // an example string
+String  message = text; // holds text not yet split
+int     commaPosition;  // the position of the next comma in the string
 void setup(){
  
   pinMode(bulb1,OUTPUT);
@@ -37,20 +40,38 @@ void setup(){
   Serial.begin(115200);
   Serial.println("Envio Bluetooth");
   Serial.println("Romel & Andrea");
+ 
   
 }
 
 void loop(){
+
   //Check if ther's anything available on the serial port
   if (Serial.available()==1){
     //we do read the character
-    char character = Serial.read();
+    String message=Serial.readString();
+    Serial.println(message);
+    for(int i=0; i<5;i++){
+      commaPosition = message.indexOf(':');
+      if(commaPosition != -1){
+        trama[i]=message.substring(0,commaPosition);
+        int aux=(int)trama[i];
+          message = message.substring(commaPosition+1, message.length());
+      }else{  // here after the last comma is found
+         if(message.length() > 0)
+           Serial.println(message);  // if there is text after the last comma,
+                                     // print it
+      }
+   }
+
+    //char character = Serial.read();
+    //Serial.println("Esto es lo que envio"+character);
     //if we're not recieving a command we check if the character read is the beginning of a command (@)
                 
-        if (character=='A') {envioGPS=true;} //Switch-off bulb1
+        if (trama[0]=='A') {envioGPS=true;} //Switch-off bulb1
        
                                            
-        else Serial.println("No llego nada:" + character);//Protocol doesn't recognize the commmand
+        else Serial.println("No llego nada:" + trama[0]);//Protocol doesn't recognize the commmand
         //End executing command
         //Reset the command-string
         //character='';

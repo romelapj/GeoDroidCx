@@ -413,8 +413,10 @@ public class Principal extends Activity implements  SensorEventListener {
             case R.id.capturaGPS:
             	try{
 					Toast.makeText(getApplicationContext(), "Capturando GPS", Toast.LENGTH_SHORT).show();
-					hb.sendInfo("A");
-			    	gps(hb.receiveInfo());
+					
+					hb.sendInfo("0:32:0:32:1");
+					
+//			    	gps(hb.receiveInfo());
 				}catch(Exception ex){
 					error=ex.toString();
 			    	Log.i(TAG, "Errores ontouch: "+error);
