@@ -185,4 +185,26 @@ public class GraficoView extends View {
 		
 	}
 
+
+	public ArrayList<Double> getLatitud() {
+		return latitud;
+	}
+
+
+	public void setLatitud(ArrayList<Double> latitud) {
+		this.latitud = latitud;
+	}
+
+
+	public ArrayList<Double> getLongitud() {
+		return longitud;
+	}
+
+
+	public void setLongitud(ArrayList<Double> longitud) {
+		this.longitud = longitud;
+	}
+	
+	
+
 }

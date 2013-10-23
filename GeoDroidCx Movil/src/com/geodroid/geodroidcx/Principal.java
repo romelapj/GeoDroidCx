@@ -27,13 +27,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.geodroid.geodroidclass.GraficoView;
 import com.geodroid.geodroidclass.HermesBluetooth;
@@ -55,7 +59,7 @@ public class Principal extends Activity implements  SensorEventListener {
     private float curZ = 0;										//valor de instancia eje z	
     //conexion Bluetooth
 	private BluetoothAdapter adaptador;							//Adaptador bluetooth del Android
-	private static final int REQUEST_ENABLE_BT = 3;				//Constante para encender bluetooth
+	private static final int REQUEST_ENABLE_BT = 3;				//Constante para encender bluetooth;
 	private ArrayList<BluetoothDevice> dispositivos;			//Arreglo con todos los dispositivos vinculados
 	public static BluetoothDevice dispositivo;					//Dispositivo Bluetooth seleccionado
 	private String[] nombresBluetooth;							//Nombres de dispositivos vinculados
@@ -72,15 +76,18 @@ public class Principal extends Activity implements  SensorEventListener {
 	private ImageButton ibDown;
 	private ImageButton ibHome;
 	//Datos GPS
-	private boolean tramAprobada;										//Verifica que la trama sea correcta
-	private double latitud;
-	private double longitud;
-	private LinearLayout llMapa;
-	private GraficoView gr; 
+private boolean tramAprobada;										//Verifica que la trama sea correcta
+	private double latitud;											//Latitud capturada 
+	private double longitud;										//Longitud capturados
+	private LinearLayout llMapa;									//Lienzo donde se dibujaran los puntos.
+	private GraficoView gr; 										//Clase encargada de dibujar el mapa.
+	private TableLayout tlLatLon;									//Tabla con todas las capturas
 	//Velocidad
 	private SeekBar sbVelocidad;
 	//Trama
 	private Trama tTrama;
+	//Estilo
+	private static final int COMPLEX_UNIT_SP = 2;					//Unidad del tamaño de la letra SP
 	
     public Principal() {
         Log.i(TAG, "Instanciado new " + this.getClass());			//depuración
@@ -133,6 +140,7 @@ public class Principal extends Activity implements  SensorEventListener {
         ibHome=(ImageButton)findViewById(R.id.ibHome);
         tTrama=new Trama();
         sbVelocidad=(SeekBar) findViewById(R.id.sbVelocidad);
+        tlLatLon =(TableLayout) findViewById(R.id.tlLatLon);
         
     }
 
@@ -352,6 +360,7 @@ public class Principal extends Activity implements  SensorEventListener {
 				latitud=Double.parseDouble(auxlat);
 				longitud=Double.parseDouble(auxlon);
 				gr.setLatLon(latitud,longitud);
+				dibujaTablaGPS();
     		}else{
     			Toast.makeText(Principal.this, "Trama Incompleta |"+auxlon+"|"+auxlat, Toast.LENGTH_SHORT).show();
     		}
@@ -363,7 +372,38 @@ public class Principal extends Activity implements  SensorEventListener {
 		
 	}
     
-    /**
+    private void dibujaTablaGPS() {
+    	tlLatLon.removeAllViews();
+    	ArrayList<Double> latitudArray=gr.getLatitud();
+    	ArrayList<Double> longitudArray=gr.getLongitud();
+    	int i=0;
+    	for(Double lat:latitudArray){
+    		TableRow tr= new TableRow(this);   		
+    		tlLatLon.addView(tr);
+    		
+    		
+    		TextView tvTCapt= new TextView(this);
+    		tvTCapt.setText((i+1)+"");
+    		tvTCapt.setWidth(70);
+    		tvTCapt.setTextSize(COMPLEX_UNIT_SP, 20);
+    		tr.addView(tvTCapt);
+    		
+    		TextView tvTLatitud= new TextView(this);
+    		tvTLatitud.setText(lat+"");
+    		tvTLatitud.setWidth(100);
+    		tvTLatitud.setTextSize(COMPLEX_UNIT_SP, 20);
+    		tr.addView(tvTLatitud); 
+    		
+    		TextView tvTLongitud=new TextView(this);
+    		tvTLongitud.setText(longitudArray.get(i++)+"");
+    		tvTLongitud.setWidth(100);
+    		tvTLongitud.setTextSize(COMPLEX_UNIT_SP, 20);
+    		tr.addView(tvTLongitud);
+    	}
+		
+	}
+
+	/**
      * verificarTramaGPS
      * Verifica que la trama gps que llega por el bluetooth sea 
      * correcta.
@@ -414,9 +454,8 @@ public class Principal extends Activity implements  SensorEventListener {
             	try{
 					Toast.makeText(getApplicationContext(), "Capturando GPS", Toast.LENGTH_SHORT).show();
 					
-					hb.sendInfo("0:32:0:32:1");
-					
-//			    	gps(hb.receiveInfo());
+					hb.sendInfo("A");
+			    	gps(hb.receiveInfo());
 				}catch(Exception ex){
 					error=ex.toString();
 			    	Log.i(TAG, "Errores ontouch: "+error);
@@ -424,12 +463,15 @@ public class Principal extends Activity implements  SensorEventListener {
                 return true;
             case R.id.reiniciarGPS:
             	gr.borrarTodoGPS();
+            	dibujaTablaGPS();
             	return true;
             case R.id.deshacerGPS:
             	gr.deshacerCapturaGPS();
+            	dibujaTablaGPS();
             	return true;
             case R.id.finalizarGPS:
             	gr.finalizarCapturaGPS();
+            	dibujaTablaGPS();
             	return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -12,6 +12,20 @@
 #define GPSBAUD  4800
 
 
+//biblioteca emulacion puertos series
+#include <SoftwareSerial.h>
+
+//biblioteca manejo de tarjeta de control de motores
+#include <PololuQik.h>
+
+//objeto para controlar los motores
+PololuQik2s12v10 controlMotores(2, 3, 5);
+
+//velocidad de motores de (0,127) en un sentido y de (0,-127) en otro sentido
+int velocidadM0=0;
+int velocidadM1=0;
+
+
 TinyGPS gps;
 
 SoftwareSerial uart_gps(RXPIN, TXPIN);
@@ -24,21 +38,16 @@ boolean envioGPS=false;
 
 
 String trama[5];
-String  text = "Peter,Paul,Mary";  // an example string
-String  message = text; // holds text not yet split
-int     commaPosition;  // the position of the next comma in the string
+String  message; // Mensaje que resivira las ordenes
+int     commaPosition;  // Posicion del caracter que dividira las tramas
 void setup(){
  
-  pinMode(bulb1,OUTPUT);
    Serial.begin(TERMBAUD);
   // Sets baud rate of your GPS
   uart_gps.begin(GPSBAUD);
  
-  //resest the WT-11 module
   
-   
-  Serial.begin(115200);
-  Serial.println("Envio Bluetooth");
+  Serial.println("GeoDroidCx");
   Serial.println("Romel & Andrea");
  
   
@@ -46,56 +55,39 @@ void setup(){
 
 void loop(){
 
-  //Check if ther's anything available on the serial port
+  //Comprueba si hay algo disponible en el puerto serie
   if (Serial.available()==1){
-    //we do read the character
+    //Leemos el String enviado.
     String message=Serial.readString();
-    Serial.println(message);
+    //Lo recorremos y separamos cada uno de los mensajes
     for(int i=0; i<5;i++){
       commaPosition = message.indexOf(':');
       if(commaPosition != -1){
         trama[i]=message.substring(0,commaPosition);
-        int aux=(int)trama[i];
           message = message.substring(commaPosition+1, message.length());
-      }else{  // here after the last comma is found
+      }else{  
          if(message.length() > 0)
-           Serial.println(message);  // if there is text after the last comma,
-                                     // print it
+          trama[i]=message;  
       }
    }
-
-    //char character = Serial.read();
-    //Serial.println("Esto es lo que envio"+character);
-    //if we're not recieving a command we check if the character read is the beginning of a command (@)
-                
-        if (trama[0]=='A') {envioGPS=true;} //Switch-off bulb1
-       
-                                           
-        else Serial.println("No llego nada:" + trama[0]);//Protocol doesn't recognize the commmand
-        //End executing command
-        //Reset the command-string
-        //character='';
-      }
-   while(envioGPS==true){
-    while(uart_gps.available())     // While there is data on the RX pin...
-    {
-        int c = uart_gps.read();    // load the data into a variable...
-        if(gps.encode(c))      // if there is a new valid sentence...
-        {
-          getgps(gps);         // then grab the data.
+   if (trama[4].toInt()==1) {
+     envioGPS=true;
+   }else 
+     Serial.println("No llego nada:" + trama[0]);//Protocol doesn't recognize the commmand
+  }
+  while(envioGPS==true){
+    while(uart_gps.available()){
+        int c = uart_gps.read();    // Carga informacion disponible
+        if(gps.encode(c)){      //si esta informacion es valida
+          getgps(gps);         // entonces graba la informacion
         }
     }
   }
    }
  
-void getgps(TinyGPS &gps)
-{
-  // To get all of the data into varialbes that you can use in your code, 
-  // all you need to do is define variables and query the object for the 
-  // data. To see the complete list of functions see keywords.txt file in 
-  // the TinyGPS and NewSoftSerial libs.
+void getgps(TinyGPS &gps){
   
-  // Define the variables that will be used
+  // Definimos las variables que podriamos utilizar
   float latitude, longitude;
   String tramaGPS="";
   // Then call this function
@@ -112,6 +104,31 @@ void getgps(TinyGPS &gps)
   }*/
   
 }
+
+void motores(){
+  //velocidad M0 se le resta 32 que se sumaron del otro lado
+  velocidadM0=((trama[1].toInt())-32)*2;
+
+  //sentido M0 negativo
+  if (trama[0].toInt()==0)
+    {
+    velocidadM0=velocidadM0*(-1);
+    }
+
+  //velocidad M1 se le resta 32 que se sumaron del otro lado
+  velocidadM1=((trama[3].toInt())-32)*2;
+
+  //sentido M1 negativo
+  if (trama[2].toInt()==0)
+    {
+    velocidadM1=velocidadM1*(-1);
+    }
+
+  //velocidad enviada al motor 0
+  controlMotores.setM0Speed(velocidadM0);
+  //velocidad enviada al motor 1
+  controlMotores.setM1Speed(velocidadM1);
+  }
 
 static String print_float(float val, int len, int prec)
   {

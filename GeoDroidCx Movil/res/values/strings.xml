@@ -13,5 +13,7 @@
     <string name="title_activity_principal">Principal</string>
     <string name="title_activity_salir">Salir</string>
     <string name="title_activity_seleccion">Seleccion</string>
+    <string name="start">Encendido</string>
+    <string name="stop">Apagado</string>
 
 </resources>

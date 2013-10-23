@@ -27,22 +27,23 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <Button
-                    android:id="@+id/btnGPS"
-                    android:layout_width="400dp"
+                <ToggleButton
+                    android:id="@+id/btnStop"
+                    android:layout_width="300dp"
                     android:layout_height="100dp"
                     android:layout_margin="40dp"
                     android:layout_marginBottom="10dp"
                     android:layout_weight="0.08"
-                    android:background="@drawable/boton2"
+                    android:background="@drawable/check"
                     android:height="600dp"
-                    android:text="Capturar"
                     android:textColor="@android:color/white"
-                    android:textSize="40px" />
+                    android:textOff="@string/start"
+                    android:textOn="@string/stop"
+                    android:textSize="40sp" />
 
                 <SeekBar
                     android:id="@+id/sbVelocidad"
-                    android:layout_width="387dp"
+                    android:layout_width="300dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="40dp"
                     android:layout_marginTop="10dp"
@@ -51,15 +52,69 @@
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnStop"
-                android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_marginTop="40dp"
-                android:height="600dp"
-                android:text="Stop"
-                android:textSize="40px"
-                android:textStyle="bold" />
+	        <TableLayout
+	            android:id="@+id/tableLayout1"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+                android:paddingTop="30dp" >
+					
+				    <TableRow
+				        android:id="@+id/tableRow1"
+				        android:layout_width="wrap_content"
+				        android:layout_height="wrap_content" >
+
+				        <TextView
+				            android:id="@+id/tvCaptura"
+				            android:layout_width="70dp"
+				            android:layout_height="wrap_content"
+				            android:layout_column="1"
+				            android:text="Capt."
+				            android:textSize="25sp" 
+				            android:textStyle="bold|italic"/>
+
+				        <TextView
+				            android:id="@+id/tvTLatitud"
+				            android:layout_width="120dp"
+				            android:layout_height="wrap_content"
+				            android:layout_column="2"
+				            android:text="Latitud"
+				            android:textSize="25sp"
+				            android:textStyle="bold|italic" />
+
+				        <TextView
+				            android:id="@+id/tvTLongitud"
+				            android:layout_width="120dp"
+				            android:layout_height="wrap_content"
+				            android:layout_column="3"
+				            android:text="Longitud"
+				            android:textSize="25sp" 
+				            android:textStyle="bold|italic"/>
+				
+				    </TableRow>
+					
+		    	</TableLayout>
+            <ScrollView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:scrollbars="none" >
+
+			    <LinearLayout
+			      android:layout_width="fill_parent"
+			      android:layout_height="fill_parent"
+			      android:orientation="vertical">
+			      
+
+		    	<TableLayout
+				    android:id="@+id/tlLatLon"
+				    android:layout_width="fill_parent"
+				    android:layout_height="fill_parent"
+				    android:padding="10dip">			    
+								
+				</TableLayout>
+				
+		      </LinearLayout>
+	      </ScrollView>
 
         </LinearLayout>
 

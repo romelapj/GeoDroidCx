@@ -80,6 +80,8 @@ public class HermesBluetooth implements Runnable{
 			return "BLUETOOTH_RECIEVE_FAIL";
 		}
 	}
+	
+	
 
 }
 
