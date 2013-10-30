@@ -8,12 +8,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,16 +20,14 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -50,7 +47,6 @@ public class Principal extends Activity implements  SensorEventListener {
 	private int contador=0;
     //Acelerometro
     private long last_update = 0;								//guardar el timestamp de la última actualización. 
-    private long last_movement = 0;								//guardar el timestamp de la última vez que se detectó movimiento.
     private float prevX = 0; 									//eje x
     private float prevY = 0; 									//eje y
     private float prevZ = 0;									//eje z
@@ -76,11 +72,18 @@ public class Principal extends Activity implements  SensorEventListener {
 	private ImageButton ibDown;
 	private ImageButton ibHome;
 	//Datos GPS
-private boolean tramAprobada;										//Verifica que la trama sea correcta
+	private boolean tramAprobada;									//Verifica que la trama sea correcta
 	private double latitud;											//Latitud capturada 
 	private double longitud;										//Longitud capturados
 	private LinearLayout llMapa;									//Lienzo donde se dibujaran los puntos.
 	private GraficoView gr; 										//Clase encargada de dibujar el mapa.
+	//Tablas GPS
+    private TableLayout tlCabecera;									//Cabecera de la Tabla
+    private TableRow.LayoutParams layouttrFila;						//Parametros de la trFila
+    private TableRow.LayoutParams layoutCapt;						//Parametros de la captura
+    private TableRow.LayoutParams layoutLongitud;					//Parametros de la longitud
+    private TableRow.LayoutParams layoutLatitud;					//Parametros de la latitud
+    private Resources rs;											//Recursos
 	private TableLayout tlLatLon;									//Tabla con todas las capturas
 	//Velocidad
 	private SeekBar sbVelocidad;
@@ -88,6 +91,7 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
 	private Trama tTrama;
 	//Estilo
 	private static final int COMPLEX_UNIT_SP = 2;					//Unidad del tamaño de la letra SP
+	
 	
     public Principal() {
         Log.i(TAG, "Instanciado new " + this.getClass());			//depuración
@@ -141,6 +145,13 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
         tTrama=new Trama();
         sbVelocidad=(SeekBar) findViewById(R.id.sbVelocidad);
         tlLatLon =(TableLayout) findViewById(R.id.tlLatLon);
+        rs = this.getResources();
+        tlCabecera = (TableLayout)findViewById(R.id.tlCabecera);
+		 layouttrFila = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
+		                                               TableRow.LayoutParams.WRAP_CONTENT);
+		 layoutCapt = new TableRow.LayoutParams(80,TableRow.LayoutParams.WRAP_CONTENT);
+		 layoutLongitud = new TableRow.LayoutParams(180,TableRow.LayoutParams.WRAP_CONTENT);
+		 layoutLatitud = new TableRow.LayoutParams(180,TableRow.LayoutParams.WRAP_CONTENT);
         
     }
 
@@ -288,7 +299,6 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
             //revisamos si este código ya se ha ejecutado alguna vez
             if (prevX == 0 && prevY == 0 && prevZ == 0) {
                 last_update = current_time;
-                last_movement = current_time;
                 prevX = curX;
                 prevY = curY;
                 prevZ = curZ;
@@ -300,7 +310,6 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
                 float movement = Math.abs((curX + curY + curZ) - (prevX - prevY - prevZ)) / time_difference;
                 float min_movement = 1E-6f;
                 if (movement > min_movement) {
-                    last_movement = current_time;
                 }
                 //actualiza los valores de X, Y y Z para la próxima vez que se registre cambio en los sensores
                 prevX = curX;
@@ -337,7 +346,8 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
      * Lanza la Activity claseLanzada
      * @param claseLanzada 
      */
-    public void lanzarActivity(Class claseLanzada){
+    @SuppressWarnings("rawtypes")
+	public void lanzarActivity(Class claseLanzada){
     	Intent i =new Intent(this, claseLanzada);
     	startActivity(i);
     }
@@ -373,32 +383,51 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
 	}
     
     private void dibujaTablaGPS() {
+    	Log.d(TAG,"Dibujando Tabla");
     	tlLatLon.removeAllViews();
     	ArrayList<Double> latitudArray=gr.getLatitud();
     	ArrayList<Double> longitudArray=gr.getLongitud();
-    	int i=0;
-    	for(Double lat:latitudArray){
-    		TableRow tr= new TableRow(this);   		
-    		tlLatLon.addView(tr);
+		TableRow trFila; 
+		TextView tvTCapt;
+		TextView tvTLatitud;
+		TextView tvTLongitud;
+		
+    	for(int i=0;i<latitudArray.size();i++){
+        	Log.d(TAG,"Dibujando Coordenadas");  
+        	int posicion = i + 1;
+            trFila = new TableRow(this);
+            trFila.setLayoutParams(layouttrFila);
+            
+
+            tvTCapt = new TextView(this);
+            tvTLatitud = new TextView(this);
+            tvTLongitud=new TextView(this);
+            
+            tvTCapt.setText(String.valueOf(posicion));
+            tvTCapt.setGravity(Gravity.CENTER_HORIZONTAL);
+            tvTCapt.setTextAppearance(this,R.style.etiqueta);
+            tvTCapt.setBackgroundResource(R.drawable.celda);
+            tvTCapt.setLayoutParams(layoutCapt);
+
+            tvTLatitud.setText(String.valueOf(latitudArray.get(i)));
+            tvTLatitud.setGravity(Gravity.CENTER_HORIZONTAL);
+            tvTLatitud.setTextAppearance(this,R.style.etiqueta);
+            tvTLatitud.setBackgroundResource(R.drawable.celda);
+            tvTLatitud.setLayoutParams(layoutLatitud);
+            
+            tvTLongitud.setText(String.valueOf(longitudArray.get(i)));
+            tvTLongitud.setGravity(Gravity.CENTER_HORIZONTAL);
+            tvTLongitud.setTextAppearance(this,R.style.etiqueta);
+            tvTLongitud.setBackgroundResource(R.drawable.celda);
+            tvTLongitud.setLayoutParams(layoutLongitud);
+//            
+            trFila.addView(tvTCapt);
+            trFila.addView(tvTLatitud);
+            trFila.addView(tvTLongitud);
+
+            tlLatLon.addView(trFila);
     		
     		
-    		TextView tvTCapt= new TextView(this);
-    		tvTCapt.setText((i+1)+"");
-    		tvTCapt.setWidth(70);
-    		tvTCapt.setTextSize(COMPLEX_UNIT_SP, 20);
-    		tr.addView(tvTCapt);
-    		
-    		TextView tvTLatitud= new TextView(this);
-    		tvTLatitud.setText(lat+"");
-    		tvTLatitud.setWidth(100);
-    		tvTLatitud.setTextSize(COMPLEX_UNIT_SP, 20);
-    		tr.addView(tvTLatitud); 
-    		
-    		TextView tvTLongitud=new TextView(this);
-    		tvTLongitud.setText(longitudArray.get(i++)+"");
-    		tvTLongitud.setWidth(100);
-    		tvTLongitud.setTextSize(COMPLEX_UNIT_SP, 20);
-    		tr.addView(tvTLongitud);
     	}
 		
 	}
@@ -508,14 +537,14 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
 	 * Se crea una lista con los bluetooth vinculados
 	 */
 	public void listaBluetooth() {
-		dispositivos = new ArrayList();
+		dispositivos = new ArrayList<BluetoothDevice>();
         for (BluetoothDevice dispositivo : adaptador.getBondedDevices()){
         	dispositivos.add(dispositivo);
         }
         nombresBluetooth=new String[dispositivos.size()];
     	if(dispositivos != null){
     		for(int indice = 0; indice < dispositivos.size(); indice++){
-	          BluetoothDevice dispositivo = (BluetoothDevice) dispositivos.get(indice);
+	          BluetoothDevice dispositivo = dispositivos.get(indice);
 	          
 	          if(dispositivo.getName() != null){
 	        	  nombresBluetooth[indice]=dispositivo.getName();
@@ -571,7 +600,7 @@ private boolean tramAprobada;										//Verifica que la trama sea correcta
 	    builder.setTitle("Bluetooth Vinculados");
 	    builder.setItems(nombresBluetooth, new DialogInterface.OnClickListener() {
 	        public void onClick(DialogInterface dialog, int pos) {
-	        	dispositivo=(BluetoothDevice) dispositivos.get(pos);
+	        	dispositivo=dispositivos.get(pos);
 	        	Toast.makeText(getApplicationContext(), "Has seleccionado: "+ dispositivo.getName(), Toast.LENGTH_SHORT).show();
 	        	hiloDeConexion();
 	            Log.i("aparec", "Has seleccionado: "+ dispositivo.getName());
