@@ -12,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -36,6 +35,8 @@ import android.widget.TableRow;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+
 import com.geodroid.geodroidclass.GraficoView;
 import com.geodroid.geodroidclass.HermesBluetooth;
 import com.geodroid.geodroidclass.Trama;
@@ -61,6 +62,7 @@ public class Principal extends Activity implements  SensorEventListener {
 	private String[] nombresBluetooth;							//Nombres de dispositivos vinculados
 	private HermesBluetooth hb;									//Clase encargada de la comunicacion
 	//Botones
+	private ToggleButton btnArranque;							//Encender | Apagar
 	//Camara
 	private WebView camarita;
 	private String urlCamara="http://192.168.0.22/"; 
@@ -77,20 +79,19 @@ public class Principal extends Activity implements  SensorEventListener {
 	private double longitud;										//Longitud capturados
 	private LinearLayout llMapa;									//Lienzo donde se dibujaran los puntos.
 	private GraficoView gr; 										//Clase encargada de dibujar el mapa.
+	private boolean captura=true;									//Se encuentra capturando
+	private boolean finalizado=false;								//Finalizado la captura
 	//Tablas GPS
-    private TableLayout tlCabecera;									//Cabecera de la Tabla
     private TableRow.LayoutParams layouttrFila;						//Parametros de la trFila
     private TableRow.LayoutParams layoutCapt;						//Parametros de la captura
     private TableRow.LayoutParams layoutLongitud;					//Parametros de la longitud
     private TableRow.LayoutParams layoutLatitud;					//Parametros de la latitud
-    private Resources rs;											//Recursos
-	private TableLayout tlLatLon;									//Tabla con todas las capturas
+    private TableLayout tlLatLon;									//Tabla con todas las capturas
 	//Velocidad
 	private SeekBar sbVelocidad;
 	//Trama
 	private Trama tTrama;
-	//Estilo
-	private static final int COMPLEX_UNIT_SP = 2;					//Unidad del tamaño de la letra SP
+	
 	
 	
     public Principal() {
@@ -130,7 +131,7 @@ public class Principal extends Activity implements  SensorEventListener {
      * Inicializa los componentes
      */
     public void initComponentes(){
-    	
+    	btnArranque=(ToggleButton) findViewById(R.id.btnArranque);
         camarita=(WebView) findViewById(R.id.camarita);
         camarita.loadUrl(urlCamara+"/cgi-bin/jpg/image");
         gr=new GraficoView(this);
@@ -145,14 +146,13 @@ public class Principal extends Activity implements  SensorEventListener {
         tTrama=new Trama();
         sbVelocidad=(SeekBar) findViewById(R.id.sbVelocidad);
         tlLatLon =(TableLayout) findViewById(R.id.tlLatLon);
-        rs = this.getResources();
-        tlCabecera = (TableLayout)findViewById(R.id.tlCabecera);
+        this.getResources();
 		 layouttrFila = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
 		                                               TableRow.LayoutParams.WRAP_CONTENT);
 		 layoutCapt = new TableRow.LayoutParams(80,TableRow.LayoutParams.WRAP_CONTENT);
 		 layoutLongitud = new TableRow.LayoutParams(180,TableRow.LayoutParams.WRAP_CONTENT);
 		 layoutLatitud = new TableRow.LayoutParams(180,TableRow.LayoutParams.WRAP_CONTENT);
-        
+        btnArranque.setChecked(false);
     }
 
     /**
@@ -228,7 +228,20 @@ public class Principal extends Activity implements  SensorEventListener {
 				tTrama.setVelocidadMotorDos(velocidad);				
 			}
 		});
-            	
+    	
+    	btnArranque.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if(btnArranque.isChecked()){
+					captura=true;
+				}else{
+					captura=false;
+				}
+				return false;
+			}
+		});
+        	
     }
     
     /** 
@@ -480,27 +493,39 @@ public class Principal extends Activity implements  SensorEventListener {
                 conexionBluetooth();
                 return true;
             case R.id.capturaGPS:
-            	try{
-					Toast.makeText(getApplicationContext(), "Capturando GPS", Toast.LENGTH_SHORT).show();
-					
-					hb.sendInfo("A");
-			    	gps(hb.receiveInfo());
-				}catch(Exception ex){
-					error=ex.toString();
-			    	Log.i(TAG, "Errores ontouch: "+error);
-				}
+            	if(finalizado){
+            		Toast.makeText(this, "No puedes realizar captura. Porque has cerrado el terreno", Toast.LENGTH_SHORT).show();
+            	}else{
+            		
+            		if(captura){
+		            	try{
+							Toast.makeText(getApplicationContext(), "Capturando GPS", Toast.LENGTH_SHORT).show();
+							
+							hb.sendInfo("A");
+					    	gps(hb.receiveInfo());
+						}catch(Exception ex){
+							error=ex.toString();
+					    	Log.i(TAG, "Errores ontouch: "+error);
+						}
+	            	}else{
+	            		Toast.makeText(this, "No puedes realizar Captura", Toast.LENGTH_SHORT).show();
+	            	}
+            	}
                 return true;
             case R.id.reiniciarGPS:
             	gr.borrarTodoGPS();
             	dibujaTablaGPS();
+            	finalizado=true;
             	return true;
             case R.id.deshacerGPS:
             	gr.deshacerCapturaGPS();
             	dibujaTablaGPS();
+            	finalizado=true;
             	return true;
             case R.id.finalizarGPS:
             	gr.finalizarCapturaGPS();
             	dibujaTablaGPS();
+            	finalizado=true;
             	return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -514,6 +539,7 @@ public class Principal extends Activity implements  SensorEventListener {
      * Verifica que el dispositivo tenga un adaptador 
      * bluetooth y si esta encendido.
      */
+	@SuppressWarnings("deprecation")
 	public void conexionBluetooth() {
 		try{
 			adaptador = BluetoothAdapter.getDefaultAdapter();
@@ -642,9 +668,5 @@ public class Principal extends Activity implements  SensorEventListener {
 		return dispositivo;
 	}
 
-	public void setDispositivo(BluetoothDevice dispositivo) {
-		this.dispositivo = dispositivo;
-	}
-    
-    
+	    
 }
